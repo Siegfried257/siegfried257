@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colegio Nombre</title>
+    <title>Proxy Página</title>
     <style>
-        /* Estilos CSS */
         body {
             font-family: Arial, sans-serif;
+            text-align: center;
             margin: 0;
             padding: 0;
         }
@@ -16,80 +16,38 @@
             color: #fff;
             padding: 10px;
             text-align: center;
-            position: relative;
         }
-        nav {
-            background-color: #444;
-            padding: 10px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
+        #url-form {
+            margin: 20px;
         }
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-        .content {
-            text-align: center;
-            padding: 20px;
-            position: relative;
-            z-index: 1;
-        }
-        .content img {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 20px;
-            display: none;
-        }
-        .active img {
-            display: block;
+        #iframe-container {
+            width: 100%;
+            height: 80vh;
+            border: none;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>¡Bienvenido al Colegio Nombre!</h1>
-        <!-- Portada con varias fotos -->
-        <div id="portada" class="active">
-            <img src="fotos/foto1.jpg" alt="Foto 1">
-            <img src="fotos/foto2.jpg" alt="Foto 2">
-            <img src="fotos/foto3.jpg" alt="Foto 3">
-        </div>
+        <h1>Proxy Web</h1>
     </header>
-    <nav>
-        <a href="#" onclick="mostrar('inicio')">Inicio</a>
-        <a href="#" onclick="mostrar('noticias')">Noticias</a>
-        <a href="#" onclick="mostrar('boletines')">Boletines</a>
-        <a href="#" onclick="mostrar('informacion')">Información</a>
-    </nav>
-    <div class="content" id="inicio">
-        <!-- Contenido de la sección Inicio -->
+    <div id="url-form">
+        <form id="proxyForm">
+            <label for="url">Ingrese el enlace:</label>
+            <input type="text" id="url" placeholder="https://ejemplo.com" required>
+            <button type="submit">Acceder</button>
+        </form>
     </div>
-    <div class="content" id="noticias">
-        <!-- Contenido de la sección Noticias -->
-    </div>
-    <div class="content" id="boletines">
-        <!-- Contenido de la sección Boletines -->
-    </div>
-    <div class="content" id="informacion">
-        <!-- Contenido de la sección Información -->
-    </div>
+    <iframe id="iframe-container"></iframe>
 
     <script>
-        // Función para mostrar la sección correspondiente y ocultar las demás
-        function mostrar(id) {
-            var secciones = document.getElementsByClassName('content');
-            for (var i = 0; i < secciones.length; i++) {
-                secciones[i].classList.remove('active');
+        document.getElementById('proxyForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var url = document.getElementById('url').value;
+            if (url) {
+                document.getElementById('iframe-container').src = url;
             }
-            document.getElementById(id).classList.add('active');
-        }
-        
-        // Mostrar la sección de inicio al cargar la página
-        window.onload = function() {
-            mostrar('inicio');
-        };
+        });
     </script>
 </body>
 </html>
