@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colegio Nombre</title>
+    <title>Chat con Firebase</title>
     <style>
         /* Estilos CSS */
         body {
@@ -17,195 +17,111 @@
             padding: 10px;
             text-align: center;
         }
-        nav {
-            background-color: #444;
-            padding: 10px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-        .content {
-            text-align: center;
+        .chat-box {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
             padding: 20px;
-            display: none;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .content.active {
-            display: block;
-        }
-        .content img {
-            max-width: 100%;
-            height: auto;
+        .messages {
+            max-height: 300px;
+            overflow-y: auto;
             margin-bottom: 20px;
         }
         .message {
-            background-color: #f9f9f9;
+            background-color: #e1e1e1;
             padding: 10px;
             margin: 10px 0;
             border-radius: 5px;
             text-align: left;
         }
-        form {
-            margin-top: 20px;
-        }
-        input, textarea {
+        input, button {
             width: 100%;
             padding: 10px;
-            margin: 10px 0;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
         button {
-            padding: 10px 20px;
             background-color: #333;
             color: #fff;
-            border: none;
             cursor: pointer;
         }
         button:hover {
             background-color: #555;
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_AUTH_DOMAIN",
+            projectId: "TU_PROJECT_ID",
+            storageBucket: "TU_STORAGE_BUCKET",
+            messagingSenderId: "TU_MESSAGING_SENDER_ID",
+            appId: "TU_APP_ID",
+            databaseURL: "https://TU_PROJECT_ID.firebaseio.com"
+        };
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const chatInput = document.getElementById('chatInput');
+            const chatMessages = document.getElementById('chatMessages');
+            const sendButton = document.getElementById('sendButton');
+
+            // Función para agregar un mensaje al chat
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (message) {
+                    const newMessageKey = database.ref().child('messages').push().key;
+                    database.ref('messages/' + newMessageKey).set({
+                        text: message,
+                        timestamp: new Date().toISOString()
+                    });
+                    chatInput.value = '';  // Limpiar el campo de entrada
+                }
+            }
+
+            // Función para escuchar mensajes en tiempo real
+            database.ref('messages').on('child_added', function(snapshot) {
+                const messageData = snapshot.val();
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.textContent = messageData.text;
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;  // Desplazar hacia el último mensaje
+            });
+
+            // Evento para enviar el mensaje al hacer clic en el botón
+            sendButton.addEventListener('click', sendMessage);
+
+            // Permitir enviar el mensaje con Enter
+            chatInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <header>
-        <h1>¡Bienvenido al Colegio Nombre!</h1>
+        <h1>Chat con Firebase</h1>
     </header>
-    <nav>
-        <a href="#inicio">Inicio</a>
-        <a href="#noticias">Noticias</a>
-        <a href="#boletines">Boletines</a>
-        <a href="#informacion">Información</a>
-        <a href="#mensajes">Mensajes</a> <!-- Enlace a la nueva sección de mensajes -->
-    </nav>
-    <div class="content active" id="inicio">
-        <!-- Portada con varias fotos -->
-        <h2>Portada</h2>
-        <img src="foto1.jpg" alt="Foto 1">
-        <img src="foto2.jpg" alt="Foto 2">
-        <img src="foto3.jpg" alt="Foto 3">
-    </div>
-    <div class="content" id="noticias">
-        <!-- Noticias -->
-        <h2>Noticias</h2>
-        <img src="noticia1.jpg" alt="Noticia 1">
-        <p>Descripción de la noticia 1...</p>
-    </div>
-    <div class="content" id="boletines">
-        <!-- Boletines -->
-        <h2>Boletines</h2>
-        <img src="boletin1.jpg" alt="Boletín 1">
-        <p>Descripción del boletín 1...</p>
-    </div>
-    <div class="content" id="informacion">
-        <!-- Información -->
-        <h2>Información</h2>
-        <img src="informacion1.jpg" alt="Información 1">
-        <p>Descripción de la información 1...</p>
-    </div>
 
-    <!-- Nueva sección de mensajes -->
-    <div class="content" id="mensajes">
-        <h2>Deja un mensaje</h2>
-        <form id="messageForm">
-            <input type="text" id="nombre" placeholder="Tu nombre" required>
-            <textarea id="mensaje" placeholder="Escribe tu mensaje aquí" required></textarea>
-            <button type="submit">Publicar Mensaje</button>
-        </form>
-        <h3>Mensajes Publicados</h3>
-        <div id="mensajesPublicados">
+    <div class="chat-box">
+        <div class="messages" id="chatMessages">
             <!-- Aquí se mostrarán los mensajes -->
         </div>
+        <input type="text" id="chatInput" placeholder="Escribe un mensaje..." />
+        <button id="sendButton">Enviar</button>
     </div>
-
-    <script>
-        // Script JavaScript para mostrar/ocultar secciones al hacer clic en los botones del menú
-        document.addEventListener("DOMContentLoaded", function() {
-            // Obtenemos todas las secciones de contenido
-            var sections = document.querySelectorAll('.content');
-            
-            // Mostramos la sección de inicio por defecto
-            showSection('inicio');
-
-            // Agregamos eventos de clic a todos los enlaces del menú
-            document.querySelectorAll('nav a').forEach(function(link) {
-                link.addEventListener('click', function(event) {
-                    var sectionId = this.getAttribute('href').substring(1);
-                    showSection(sectionId);
-                    // Guardamos la sección actual en el almacenamiento local del navegador
-                    localStorage.setItem('lastSection', sectionId);
-                    event.preventDefault(); // Prevenimos el comportamiento predeterminado del enlace
-                });
-            });
-
-            // Función para mostrar la sección deseada y ocultar las demás
-            function showSection(sectionId) {
-                sections.forEach(function(section) {
-                    if (section.id === sectionId) {
-                        section.classList.add('active');
-                    } else {
-                        section.classList.remove('active');
-                    }
-                });
-            }
-
-            // Obtenemos la última sección visitada desde el almacenamiento local
-            var lastSection = localStorage.getItem('lastSection');
-            if (lastSection) {
-                showSection(lastSection);
-            }
-
-            // Función para agregar mensajes
-            const messageForm = document.getElementById('messageForm');
-            const mensajesPublicados = document.getElementById('mensajesPublicados');
-
-            messageForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-
-                // Obtenemos el nombre y el mensaje
-                const nombre = document.getElementById('nombre').value;
-                const mensaje = document.getElementById('mensaje').value;
-
-                // Creamos el nuevo mensaje
-                const nuevoMensaje = {
-                    nombre: nombre,
-                    mensaje: mensaje
-                };
-
-                // Obtenemos los mensajes existentes desde localStorage
-                let mensajes = JSON.parse(localStorage.getItem('mensajes')) || [];
-
-                // Agregamos el nuevo mensaje
-                mensajes.push(nuevoMensaje);
-
-                // Guardamos los mensajes actualizados en localStorage
-                localStorage.setItem('mensajes', JSON.stringify(mensajes));
-
-                // Limpiamos el formulario
-                messageForm.reset();
-
-                // Mostramos los mensajes actualizados
-                mostrarMensajes();
-            });
-
-            // Función para mostrar los mensajes guardados
-            function mostrarMensajes() {
-                const mensajes = JSON.parse(localStorage.getItem('mensajes')) || [];
-                mensajesPublicados.innerHTML = '';
-
-                mensajes.forEach(function(mensaje) {
-                    const divMensaje = document.createElement('div');
-                    divMensaje.classList.add('message');
-                    divMensaje.innerHTML = `<strong>${mensaje.nombre}:</strong> <p>${mensaje.mensaje}</p>`;
-                    mensajesPublicados.appendChild(divMensaje);
-                });
-            }
-
-            // Mostramos los mensajes al cargar la página
-            mostrarMensajes();
-        });
-    </script>
 </body>
 </html>
